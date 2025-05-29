@@ -78,7 +78,6 @@ const handleImageUpload = async (e) => {
   const formData = new FormData()
   formData.append('image', file)
 
-  // تأكد إنك عامل route لرفع الصورة
   const res = await axios.post('/api/upload-image', formData)
   form.value.image_url = res.data.image_url
 }

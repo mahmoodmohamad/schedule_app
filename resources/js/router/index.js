@@ -10,7 +10,6 @@ const routes = [
   { path: '/login', component: Login },
   { path: '/dashboard', component: Dashboard },
   { path: '/platform-settings', component: PlatformSettings },
-  // Add these missing routes
   { path: '/editor', component: PostEditor },
   { path: '/settings', component: PlatformSettings },
   { path: '/posts', component: PostList },

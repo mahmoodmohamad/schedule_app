@@ -60,15 +60,14 @@ const login = async () => {
       password: password.value
     });
     
-    // Make sure you're storing the token exactly as received
-    // Log the token to verify its format
+  
     console.log('Token received:', response.data.access_token);
     
     localStorage.setItem('token', response.data.access_token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
     router.push('/dashboard');
   } catch (err) {
-    // Add more detailed error logging
+    
     console.error('Login error:', err);
     error.value = err.response?.data?.message || 'Login failed';
   }

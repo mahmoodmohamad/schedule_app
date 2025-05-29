@@ -46,7 +46,6 @@ const fetchPlatforms = async () => {
 }
 
 const edit = (platform) => {
-  // فتح مودال التعديل
   alert(`Edit ${platform.name}`)
 }
 
