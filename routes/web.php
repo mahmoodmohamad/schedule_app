@@ -5,11 +5,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/{any}', function () {
+    return view('dashboard');   
+})->where('any', '.*');
 
 
-Route::get('/login', function () {
-    return view('dashboard'); // This should be your main blade template that loads Vue
-})->name('login');
+//Route::get('/login', function () {
+  //  return view('dashboard'); 
+//})->name('login');
 //Route::view('/dashboard', 'dashboard');
 
 Route::middleware(['auth'])->group(function () {

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Post Editor</title>
+    <title>Schedule App</title>
     @vite('resources/js/app.js')
 </head>
 <body>

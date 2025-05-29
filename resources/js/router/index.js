@@ -3,6 +3,7 @@ import Login from '../components/LoginForm.vue'; // Verify this path is correct
 import Dashboard from '../components/Dashboard.vue';
 import PlatformSettings from '../components/PlatformSettings.vue';
 import PostEditor from '../components/PostEditor.vue';
+import PostList from '../components/PostList.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -11,7 +12,8 @@ const routes = [
   { path: '/platform-settings', component: PlatformSettings },
   // Add these missing routes
   { path: '/editor', component: PostEditor },
-  { path: '/settings', component: PlatformSettings }
+  { path: '/settings', component: PlatformSettings },
+  { path: '/posts', component: PostList },
 ];
 
 const router = createRouter({

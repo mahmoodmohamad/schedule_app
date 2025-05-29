@@ -4,6 +4,12 @@
       <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
       <div class="space-x-4">
         <router-link
+          to="/posts"
+          class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+        >
+           Posts
+        </router-link>
+        <router-link
           to="/editor"
           class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
         >
@@ -13,7 +19,7 @@
           to="/settings"
           class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
         >
-          Settings
+          PlatForm Settings
         </router-link>
         <button
           @click="logout"
