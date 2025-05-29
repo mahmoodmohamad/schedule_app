@@ -27,7 +27,7 @@ class SaveController extends Controller
 
         $user = Auth::user();
 
-        // 🔐 Check how many posts the user has scheduled for that day
+        
         $scheduledDate = Carbon::parse($data['schedule_time'])->toDateString();
         $scheduledCount = Post::where('user_id', $user->id)
             ->whereDate('schedule_time', $scheduledDate)
