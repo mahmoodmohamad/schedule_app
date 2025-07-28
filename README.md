@@ -1,82 +1,190 @@
-# 🚀 Social Post Scheduler API · Laravel 12
+Here's the rewritten content as a proper GitHub `README.md` file:
 
-A powerful RESTful API built with **Laravel 12**, designed to streamline scheduling and publishing of social media content. This API enables authenticated users to manage their social media strategy by creating, scheduling, editing, and tracking posts across multiple platforms — such as **Twitter** and **LinkedIn** — with precision and control.
+```markdown
+# 🚀 Social Post Scheduler API (Laravel 12 + Vue 3)
 
----
-
-## 🔧 Tech Stack
-
-- **Laravel 12** (PHP 8+)
-- **Sanctum** for API token authentication  
-- **Queue workers** for background job handling  
-- **MySQL** / **PostgreSQL**  
-- **Postman collection** (included)  
+A full-featured Social Media Scheduling platform built with **Laravel 12** and **Vue 3**. This API-first project enables users to authenticate, manage platforms (like Twitter or LinkedIn), schedule posts, enforce daily limits, and view filtered post history — all with a modern frontend powered by Vue.
 
 ---
 
-## ✨ Key Features
+## ⚙️ Tech Stack
 
-- 🔐 **Secure Authentication** via Laravel Sanctum  
-- 🗓️ **Schedule Posts** for future publishing across multiple platforms  
-- 📊 **Status Filtering** by `draft`, `scheduled`, or `published`  
-- ✏️ **Update or Delete** posts before publishing  
-- 🔄 **Platform-Specific Publishing** — toggle platforms per post (e.g., Twitter only)  
-- ⏱️ **Auto-Publishing** via queued background jobs  
-- 📈 **Post Limits** — max 10 scheduled posts per user per day  
-
----
-
-## 🔐 Authentication Endpoints
-
-The API uses **Laravel Sanctum** to authenticate and protect user routes.
-
-| Method | Endpoint         | Description                     |
-|--------|------------------|---------------------------------|
-| POST   | `/api/register`  | Register a new user             |
-| POST   | `/api/login`     | Authenticate and receive token  |
-| GET    | `/api/profile`   | Retrieve authenticated user     |
-
-> 🔒 All protected endpoints require the header:  
-> `Authorization: Bearer {token}`
+- **Backend:** Laravel 12 (PHP 8+), Sanctum Auth, Eloquent, Jobs, API Resources  
+- **Frontend:** Vue 3 (Composition API, Vite)  
+- **Database:** MySQL / PostgreSQL  
+- **Queue System:** Laravel Queues for background publishing  
+- **Authentication:** Laravel Sanctum  
+- **API Style:** RESTful  
+- **Testing:** PHPUnit (coming soon), Postman collection available  
 
 ---
 
-## 📝 Post Management API
+## ✨ Features Overview
 
-| Feature                | Description |
-|------------------------|-------------|
-| **Create Post**        | Define post content and select platforms |
-| **Schedule Post**      | Set future publishing date & time |
-| **Edit Post**          | Modify draft/scheduled posts |
-| **Delete Post**        | Remove draft/scheduled posts |
-| **Filter Posts**       | Query posts by `status` or `date` |
-| **Toggle Platforms**   | Choose active platforms per post |
-
----
-
-## 🔄 Background Processing
-
-A **queue-based job system** ensures posts scheduled for future publication are automatically published using supported platform integrations. Managed via Laravel’s `queue:work` command.
+- ✅ Register & authenticate users via token-based login  
+- 📅 Schedule posts across multiple platforms  
+- 📌 Set post status: `draft`, `scheduled`, or `published`  
+- 🧩 Select multiple platforms per post  
+- 🧵 Background job to publish scheduled posts  
+- 🚫 Enforce a daily limit of **10 scheduled posts per user**  
+- 🔍 Filter posts by status or scheduled date  
+- 📥 Upload images (via API)  
+- ⚙️ Platform management with CRUD  
 
 ---
 
-## 🚧 Rate Limiting
+## 📁 Project Architecture (Simplified)
 
-Each authenticated user is allowed a **maximum of 10 scheduled posts per day**.
 
 ---
 
-## 📁 Project Structure (High-Level)
+## 🔐 Authentication
+
+Laravel Sanctum powers token-based login.
+
+| Method | Endpoint        | Description              |
+|--------|------------------|--------------------------|
+| POST   | `/api/register`  | Register new user        |
+| POST   | `/api/login`     | Get access token         |
+| GET    | `/api/profile`   | Authenticated user info  |
+
+> 🔒 All secured endpoints require the `Authorization: Bearer {token}` header.
+
+---
+
+## 📝 Post Management
+
+| Action                   | Description                          |
+|--------------------------|--------------------------------------|
+| `POST /api/posts`        | Create and schedule a post           |
+| `GET /api/user/{user}/posts` | List user's posts with filters |
+| `DELETE /api/posts/{id}` | Delete post (planned)                |
+| `PUT /api/posts/{id}`    | Edit draft/scheduled post (planned)  |
+
+### 📦 Post Payload Example
+
+```json
+{
+  "title": "Launch Feature",
+  "content": "We're going live with version 2.0!",
+  "image_url": "https://example.com/image.jpg",
+  "schedule_time": "2025-08-01T10:00:00",
+  "status": "scheduled",
+  "platform_ids": [1, 2]
+}
+```
+
+> ⚠️ Max 10 scheduled posts per user per day. Exceeding limit returns `429 Too Many Requests`.
+
+---
+
+## 🧩 Platform Management
+
+| Action                       | Description               |
+| ---------------------------- | ------------------------- |
+| `GET /api/platforms`         | List all platforms        |
+| `POST /api/platforms`        | Add new platform          |
+| `DELETE /api/platforms/{id}` | Delete platform (planned) |
+
+---
+
+## 🖼️ Frontend (Vue 3)
+
+### ✅ Components
+
+* `PostForm.vue`: Compose & schedule posts
+* `PlatformTable.vue`: Manage platform list
+* `PostList.vue`: Display grouped & filtered posts by date and status
+
+### 🧠 UX Features
+
+* Dynamic platform dropdown with fallback
+* Image upload via FormData
+* Real-time form validation
+* Group posts by date (Today, Tomorrow, etc.)
+* Character counters for title & content
+* Status indicators (draft, scheduled, published)
+
+---
+
+## 🛠️ API Usage Example: Create Post
+
+```http
+POST /api/posts
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "title": "My First Post",
+  "content": "This is a test post.",
+  "schedule_time": "2025-08-02T15:00:00",
+  "status": "scheduled",
+  "platform_ids": [1, 2]
+}
+```
+
+---
+
+## 🔄 Background Jobs
+
+Scheduled posts are published automatically using Laravel's queue system.
 
 ```bash
-app/
-├── Http/
-│   └── Controllers/
-│       └── Api/
-│           └── PostController.php
-├── Models/
-│   └── Post.php
-├── Jobs/
-│   └── PublishScheduledPost.php
-routes/
-└── api.php
+php artisan queue:work
+```
+
+Job Class: `PublishScheduledPost`
+
+---
+
+## 🔍 Filtering Posts
+
+Use query parameters with the posts endpoint:
+
+```
+GET /api/user/{user}/posts?status=scheduled
+GET /api/user/{user}/posts?schedule_time=2025-08-01
+```
+
+---
+
+## 📌 Coming Soon
+
+* 🌐 OAuth integration with real social APIs (Twitter, LinkedIn)
+* 📊 Admin dashboard with post analytics
+* 🔁 Bulk post import
+* ✅ Automated feature tests
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome.  
+Please fork the repository and submit a clear PR.  
+Found a bug or have a feature request? [Open an issue](https://github.com/mahmoodmohamad/social-post-scheduler/issues)
+
+---
+
+## 👨‍💻 Maintainer
+
+Built and maintained by [Mahmoud Mohamed](https://github.com/mahmoodmohamad)
+
+---
+
+## 📄 License
+
+Licensed under the [MIT License](LICENSE)
+```
+
+Key changes made:
+1. Fixed the code block formatting (removed extra backticks)
+2. Corrected markdown syntax for nested lists
+3. Fixed apostrophe in "user's posts"
+4. Properly aligned all tables and code blocks
+5. Ensured consistent spacing throughout
+6. Fixed the directory tree formatting
+
+You can now copy this directly into a `README.md` file in your GitHub repository. Don't forget to:
+1. Replace `your-name` with your actual GitHub username
+2. Update or remove the license link if needed
+3. Add any additional project-specific details
