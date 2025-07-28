@@ -175,16 +175,3 @@ Built and maintained by [Mahmoud Mohamed](https://github.com/mahmoodmohamad)
 
 Licensed under the [MIT License](LICENSE)
 ```
-
-Key changes made:
-1. Fixed the code block formatting (removed extra backticks)
-2. Corrected markdown syntax for nested lists
-3. Fixed apostrophe in "user's posts"
-4. Properly aligned all tables and code blocks
-5. Ensured consistent spacing throughout
-6. Fixed the directory tree formatting
-
-You can now copy this directly into a `README.md` file in your GitHub repository. Don't forget to:
-1. Replace `your-name` with your actual GitHub username
-2. Update or remove the license link if needed
-3. Add any additional project-specific details
