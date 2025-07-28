@@ -146,14 +146,6 @@ GET /api/user/{user}/posts?status=scheduled
 GET /api/user/{user}/posts?schedule_time=2025-08-01
 ```
 
----
-
-## 📌 Coming Soon
-
-* 🌐 OAuth integration with real social APIs (Twitter, LinkedIn)
-* 📊 Admin dashboard with post analytics
-* 🔁 Bulk post import
-* ✅ Automated feature tests
 
 ---
 
