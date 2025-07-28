@@ -1,39 +1,82 @@
-Social Post Scheduler API (Laravel 12)
-This project is a REST API built with Laravel 12 for managing and scheduling social media posts. Users can create posts, choose platforms such as Twitter or LinkedIn to publish on, schedule posts for later, update them, and track their status.
+# 🚀 Social Post Scheduler API · Laravel 12
 
-✅ Features
-User authentication using Laravel Sanctum
+A powerful RESTful API built with **Laravel 12**, designed to streamline scheduling and publishing of social media content. This API enables authenticated users to manage their social media strategy by creating, scheduling, editing, and tracking posts across multiple platforms — such as **Twitter** and **LinkedIn** — with precision and control.
 
-Create and schedule posts to multiple platforms
+---
 
-Filter posts by status (draft, scheduled, published) and by date
+## 🔧 Tech Stack
 
-Update or delete scheduled posts
+- **Laravel 12** (PHP 8+)
+- **Sanctum** for API token authentication  
+- **Queue workers** for background job handling  
+- **MySQL** / **PostgreSQL**  
+- **Postman collection** (included)  
 
-Limit of 10 scheduled posts per user per day
+---
 
-Toggle platform status for each post
+## ✨ Key Features
 
-Background job that automatically publishes scheduled posts
+- 🔐 **Secure Authentication** via Laravel Sanctum  
+- 🗓️ **Schedule Posts** for future publishing across multiple platforms  
+- 📊 **Status Filtering** by `draft`, `scheduled`, or `published`  
+- ✏️ **Update or Delete** posts before publishing  
+- 🔄 **Platform-Specific Publishing** — toggle platforms per post (e.g., Twitter only)  
+- ⏱️ **Auto-Publishing** via queued background jobs  
+- 📈 **Post Limits** — max 10 scheduled posts per user per day  
 
-🔐 Authentication
-The API uses Laravel Sanctum to secure login and registration.
+---
 
-Available endpoints:
+## 🔐 Authentication Endpoints
 
-POST /api/register
+The API uses **Laravel Sanctum** to authenticate and protect user routes.
 
-POST /api/login
+| Method | Endpoint         | Description                     |
+|--------|------------------|---------------------------------|
+| POST   | `/api/register`  | Register a new user             |
+| POST   | `/api/login`     | Authenticate and receive token  |
+| GET    | `/api/profile`   | Retrieve authenticated user     |
 
-GET /api/profile — Retrieve data of the logged-in user
+> 🔒 All protected endpoints require the header:  
+> `Authorization: Bearer {token}`
 
-📝 Post Management
-Users can:
+---
 
-Create posts and select platforms to publish on
+## 📝 Post Management API
 
-Schedule posts for future publishing
+| Feature                | Description |
+|------------------------|-------------|
+| **Create Post**        | Define post content and select platforms |
+| **Schedule Post**      | Set future publishing date & time |
+| **Edit Post**          | Modify draft/scheduled posts |
+| **Delete Post**        | Remove draft/scheduled posts |
+| **Filter Posts**       | Query posts by `status` or `date` |
+| **Toggle Platforms**   | Choose active platforms per post |
 
-Edit or delete posts before they are published
+---
 
-View their posts with filters by status or date
+## 🔄 Background Processing
+
+A **queue-based job system** ensures posts scheduled for future publication are automatically published using supported platform integrations. Managed via Laravel’s `queue:work` command.
+
+---
+
+## 🚧 Rate Limiting
+
+Each authenticated user is allowed a **maximum of 10 scheduled posts per day**.
+
+---
+
+## 📁 Project Structure (High-Level)
+
+```bash
+app/
+├── Http/
+│   └── Controllers/
+│       └── Api/
+│           └── PostController.php
+├── Models/
+│   └── Post.php
+├── Jobs/
+│   └── PublishScheduledPost.php
+routes/
+└── api.php
