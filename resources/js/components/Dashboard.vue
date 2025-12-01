@@ -19,7 +19,7 @@
           to="/settings"
           class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
         >
-          PlatForm Settings
+          Platform Settings
         </router-link>
         <button
           @click="logout"
@@ -114,31 +114,7 @@ const loadPosts = async () => {
   } catch (err) {
     console.error('Failed to load posts:', err);
     error.value = 'Failed to load posts';
-    
-    // Demo data fallback for testing
-    posts.value = [
-      { 
-        id: 1, 
-        title: 'Welcome to Social Media Manager', 
-        status: 'published', 
-        created_at: new Date().toISOString(),
-        content: 'This is your first post!'
-      },
-      { 
-        id: 2, 
-        title: 'Scheduled Post Example', 
-        status: 'scheduled', 
-        schedule_time: new Date(Date.now() + 86400000).toISOString(),
-        content: 'This post is scheduled for tomorrow.'
-      },
-      { 
-        id: 3, 
-        title: 'Draft Post Example', 
-        status: 'draft', 
-        created_at: new Date().toISOString(),
-        content: 'This is a draft post.'
-      }
-    ];
+    posts.value = [];
   } finally {
     loading.value = false;
   }

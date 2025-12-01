@@ -22,6 +22,9 @@
               <div v-if="post.content" class="text-xs text-gray-600 truncate">
                 {{ post.content.substring(0, 50) }}{{ post.content.length > 50 ? '...' : '' }}
               </div>
+              <div class="text-xs text-gray-500 mt-1">
+                {{ getPostTime(post) }}
+              </div>
             </div>
             <StatusIndicator :status="post.status" />
           </div>
@@ -42,14 +45,49 @@ const props = defineProps({
   }
 });
 
+const parseDate = (dateString) => {
+  if (!dateString) return null;
+  
+  if (dateString.includes('T')) {
+    return new Date(dateString);
+  } else if (dateString.includes(' ')) {
+    return new Date(dateString.replace(' ', 'T'));
+  } else {
+    return new Date(dateString);
+  }
+};
+
+const getPostTime = (post) => {
+  const scheduleTime = parseDate(post.schedule_time);
+  const createdTime = parseDate(post.created_at);
+  
+  if (scheduleTime) {
+    return `Scheduled: ${scheduleTime.toLocaleString()}`;
+  } else if (createdTime) {
+    return `Created: ${createdTime.toLocaleString()}`;
+  }
+  return 'No date';
+};
+
 const groupedByDate = computed(() => {
   return props.posts.reduce((groups, post) => {
-    const date = post.schedule_time ? 
-      new Date(post.schedule_time).toDateString() : 
-      new Date(post.created_at).toDateString();
+    let dateToUse;
     
-    if (!groups[date]) groups[date] = [];
-    groups[date].push(post);
+    if (post.schedule_time) {
+      dateToUse = parseDate(post.schedule_time);
+    } else if (post.created_at) {
+      dateToUse = parseDate(post.created_at);
+    } else {
+      dateToUse = new Date();
+    }
+    
+    const dateKey = dateToUse.toDateString();
+    
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+    groups[dateKey].push(post);
+    
     return groups;
   }, {});
 });
@@ -68,7 +106,8 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-US', { 
       weekday: 'short', 
       month: 'short', 
-      day: 'numeric' 
+      day: 'numeric',
+      year: 'numeric'
     });
   }
 };

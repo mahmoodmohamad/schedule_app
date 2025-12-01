@@ -1,50 +1,71 @@
 <template>
-  <div class="max-w-4xl mx-auto mt-6 space-y-4">
-    <h2 class="text-xl font-bold">Posts List</h2>
+  <div class="bg-white border rounded-lg">
+    <div v-if="posts.length === 0" class="text-center text-gray-500 py-8">
+      No posts found.
+    </div>
 
-    <table v-if="posts.length > 0" class="w-full border border-gray-200">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="p-2 text-left">ID</th>
-          <th class="p-2 text-left">Title</th>
-          <th class="p-2 text-left">Status</th>
-          <th class="p-2 text-left">Schedule Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(post, index) in posts" :key="post.id" class="border-t">
-          <td class="p-2">{{ index + 1 }}</td> 
-          <td class="p-2">{{ post.title }}</td>
-          <td class="p-2">{{ post.status }}</td>
-          <td class="p-2">{{ post.schedule_time }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div v-else class="text-gray-500">No posts found.</div>
-
-    <div v-if="loading" class="text-gray-500">Loading...</div>
-    <div v-if="error" class="text-red-500">Failed to load posts: {{ error }}</div>
+    <div v-else class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schedule Time</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr v-for="post in posts" :key="post.id" class="hover:bg-gray-50">
+            <td class="px-4 py-4">
+              <div class="text-sm font-medium text-gray-900">{{ post.title }}</div>
+              <div v-if="post.content" class="text-sm text-gray-600 truncate max-w-xs">
+                {{ post.content.substring(0, 60) }}{{ post.content.length > 60 ? '...' : '' }}
+              </div>
+            </td>
+            <td class="px-4 py-4">
+              <StatusIndicator :status="post.status" />
+            </td>
+            <td class="px-4 py-4 text-sm text-gray-900">
+              {{ formatDateTime(post.schedule_time) || 'Not scheduled' }}
+            </td>
+            <td class="px-4 py-4 text-sm text-gray-900">
+              {{ formatDateTime(post.created_at) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import StatusIndicator from './StatusIndicator.vue';
 
-const posts = ref([])
-const loading = ref(true)
-const error = ref(null)
-
-onMounted(async () => {
-  try {
-    const res = await axios.get('/api/posts')
-    posts.value = res.data.posts
-  } catch (err) {
-    console.error(err)
-    error.value = err.response?.data?.message || 'Error fetching posts'
-  } finally {
-    loading.value = false
+const props = defineProps({
+  posts: {
+    type: Array,
+    default: () => []
   }
-})
+});
+
+const formatDateTime = (dateString) => {
+  if (!dateString) return null;
+  
+  let date;
+  if (dateString.includes('T')) {
+    date = new Date(dateString);
+  } else if (dateString.includes(' ')) {
+    date = new Date(dateString.replace(' ', 'T'));
+  } else {
+    date = new Date(dateString);
+  }
+  
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 </script>
