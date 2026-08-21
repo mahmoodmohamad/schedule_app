@@ -1,130 +1,87 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6 space-y-6">
-    <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-gray-900">Platform Management</h1>
-      <router-link 
-        to="/dashboard" 
-        class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
-      >
-        Back to Dashboard
-      </router-link>
-    </div>
+  <div class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Workspace settings</p>
+        <h1 class="page-title">Connected platforms</h1>
+        <p class="page-subtitle">Manage the destinations available when you create and schedule content.</p>
+      </div>
+      <router-link class="button button-secondary" to="/dashboard">← Back to dashboard</router-link>
+    </header>
 
-    <!-- Add Platform Form -->
-    <div class="bg-white p-6 rounded-lg border">
-      <h2 class="text-lg font-medium mb-4">Add New Platform</h2>
-      <form @submit.prevent="createPlatform" class="flex gap-4 items-end">
-        <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Platform Name</label>
-          <input 
-            v-model="newPlatform.name" 
-            type="text" 
-            placeholder="e.g., Facebook, Twitter, Instagram" 
-            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            required 
-          />
+    <div class="form-layout">
+      <section class="surface form-card">
+        <div class="surface-header" style="margin: -22px -22px 24px">
+          <div><h2 class="section-title">Add a platform</h2><p class="section-caption">Keep your publishing destinations organized.</p></div>
+          <span class="stat-icon">＋</span>
         </div>
-        <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
-          <select 
-            v-model="newPlatform.type" 
-            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            required
-          >
-            <option value="">Select Type</option>
-            <option value="social">Social Media</option>
-            <option value="blog">Blog</option>
-            <option value="news">News</option>
-            <option value="other">Other</option>
-          </select>
+        <div v-if="error" class="alert alert-danger" role="alert" style="margin-bottom: 18px">{{ error }}</div>
+        <div v-if="success" class="alert alert-success" role="status" style="margin-bottom: 18px">{{ success }}</div>
+        <form @submit.prevent="createPlatform">
+          <div class="field">
+            <label class="field-label" for="platform-name">Platform name</label>
+            <input id="platform-name" v-model.trim="newPlatform.name" class="form-control" type="text" placeholder="e.g. LinkedIn or Company blog" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="platform-type">Platform type</label>
+            <select id="platform-type" v-model="newPlatform.type" class="form-control" required>
+              <option value="">Choose a type</option>
+              <option value="social">Social media</option>
+              <option value="blog">Blog</option>
+              <option value="news">News</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <button class="button button-primary" type="submit" :disabled="creating || !newPlatform.name || !newPlatform.type">
+            {{ creating ? 'Adding platform…' : 'Add platform' }}
+          </button>
+        </form>
+      </section>
+
+      <section class="surface">
+        <div class="surface-header">
+          <div><h2 class="section-title">Your platforms</h2><p class="section-caption">{{ platforms.length }} connected destination{{ platforms.length === 1 ? '' : 's' }}.</p></div>
         </div>
-        <button 
-          type="submit" 
-          :disabled="creating"
-          class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {{ creating ? 'Adding...' : 'Add Platform' }}
-        </button>
-      </form>
-    </div>
-
-    <!-- Platforms List -->
-    <div class="bg-white rounded-lg border overflow-hidden">
-      <div class="px-6 py-4 border-b bg-gray-50">
-        <h2 class="text-lg font-medium">Your Platforms</h2>
-      </div>
-
-      <div v-if="loading" class="text-center py-8">
-        <div class="text-gray-600">Loading platforms...</div>
-      </div>
-
-      <div v-else-if="platforms.length === 0" class="text-center py-8">
-        <div class="text-gray-500">No platforms added yet. Add your first platform above.</div>
-      </div>
-
-      <div v-else class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="(platform, index) in platforms" :key="platform.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 text-sm text-gray-900">{{ index + 1 }}</td>
-              <td class="px-6 py-4">
-                <div class="text-sm font-medium text-gray-900">{{ platform.name }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {{ platform.type }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900">
-                {{ formatDate(platform.created_at) }}
-              </td>
-              <td class="px-6 py-4">
-                <button 
-                  @click="deletePlatform(platform.id)" 
-                  class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <div v-if="loading" class="state"><strong>Loading platforms</strong><p>Checking your connected destinations.</p></div>
+        <div v-else-if="platforms.length === 0" class="state"><strong>No platforms yet</strong><p>Add your first destination to make posts publishable.</p></div>
+        <div v-else class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Platform</th><th>Type</th><th>Added</th><th><span class="sr-only">Actions</span></th></tr></thead>
+            <tbody>
+              <tr v-for="platform in platforms" :key="platform.id">
+                <td><p class="table-title">{{ platform.name }}</p></td>
+                <td><span class="status-pill status-draft">{{ platform.type }}</span></td>
+                <td class="section-caption">{{ formatDate(platform.created_at) }}</td>
+                <td style="text-align: right"><button class="button button-danger" type="button" :disabled="deletingId === platform.id" @click="deletePlatform(platform.id)">{{ deletingId === platform.id ? 'Deleting…' : 'Delete' }}</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import axios from 'axios';
 
 const platforms = ref([]);
 const newPlatform = ref({ name: '', type: '' });
 const loading = ref(true);
 const creating = ref(false);
+const deletingId = ref(null);
+const error = ref('');
+const success = ref('');
 
 const fetchPlatforms = async () => {
   loading.value = true;
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.get('/api/platforms', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await axios.get('/api/platforms');
     platforms.value = response.data.platforms || [];
-  } catch (error) {
-    console.error('Failed to load platforms:', error);
-    platforms.value = [];
+  } catch (err) {
+    console.error('Failed to load platforms:', err);
+    error.value = 'We could not load your platforms. Please try again.';
   } finally {
     loading.value = false;
   }
@@ -132,52 +89,41 @@ const fetchPlatforms = async () => {
 
 const createPlatform = async () => {
   creating.value = true;
+  error.value = '';
+  success.value = '';
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.post('/api/platforms', newPlatform.value, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await axios.post('/api/platforms', newPlatform.value);
     platforms.value.push(response.data.platform);
     newPlatform.value = { name: '', type: '' };
-  } catch (error) {
-    console.error('Failed to create platform:', error);
-    alert('Failed to create platform. Please try again.');
+    success.value = 'Platform added successfully.';
+  } catch (err) {
+    console.error('Failed to create platform:', err);
+    error.value = err.response?.data?.message || 'The platform could not be added.';
   } finally {
     creating.value = false;
   }
 };
 
 const deletePlatform = async (id) => {
-  if (!confirm('Are you sure you want to delete this platform?')) {
-    return;
-  }
-
+  if (!window.confirm('Delete this platform? Existing posts will keep their records, but it will no longer be available for new posts.')) return;
+  deletingId.value = id;
+  error.value = '';
   try {
-    const token = localStorage.getItem('token');
-    await axios.delete(`/api/platforms/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    platforms.value = platforms.value.filter(p => p.id !== id);
-  } catch (error) {
-    console.error('Failed to delete platform:', error);
-    alert('Failed to delete platform. Please try again.');
+    await axios.delete(`/api/platforms/${id}`);
+    platforms.value = platforms.value.filter((platform) => platform.id !== id);
+    success.value = 'Platform deleted.';
+  } catch (err) {
+    console.error('Failed to delete platform:', err);
+    error.value = 'The platform could not be deleted. Please try again.';
+  } finally {
+    deletingId.value = null;
   }
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
-  
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
-
+const formatDate = (value) => value ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value)) : '—';
 onMounted(fetchPlatforms);
 </script>
+
+<style scoped>
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+</style>

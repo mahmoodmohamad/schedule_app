@@ -58,6 +58,8 @@ jobs:
     - name: Build assets
       run: npm run build
 
-    # Optional: run tests
+    - name: Run frontend tests
+      run: npm test
+
     - name: Run PHPUnit tests
       run: ./vendor/bin/phpunit

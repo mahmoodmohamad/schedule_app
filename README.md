@@ -1,169 +1,118 @@
-Here's the rewritten content as a proper GitHub `README.md` file:
+# Schedule App
 
-```markdown
-# 🚀 Social Post Scheduler API (Laravel 12 + Vue 3)
+Schedule App is a Laravel and Vue.js workspace for preparing, organizing, and publishing content across connected platforms. The frontend is designed around a focused dashboard, a structured post editor, a publishing calendar, and lightweight platform management.
 
-A full-featured Social Media Scheduling platform built with **Laravel 12** and **Vue 3**. This API-first project enables users to authenticate, manage platforms (like Twitter or LinkedIn), schedule posts, enforce daily limits, and view filtered post history — all with a modern frontend powered by Vue.
+> This README is provisional. API integrations and publishing providers are still evolving, so endpoint behavior and supported platform capabilities may change.
 
----
+## Current product surface
 
-## ⚙️ Tech Stack
+| Area | Description |
+| --- | --- |
+| Dashboard | View post totals, filter the queue, inspect recent posts, and review upcoming scheduled content. |
+| Post editor | Create a draft, scheduled, or published post with optional image upload and platform selection. |
+| Platforms | Add and remove publishing destinations used by the post editor. |
+| Authentication | Sign in through the Laravel API and maintain a browser session with a bearer token. |
+| Frontend validation | Vue component tests run with Vitest and Vue Test Utils. |
 
-- **Backend:** Laravel 12 (PHP 8+), Sanctum Auth, Eloquent, Jobs, API Resources  
-- **Frontend:** Vue 3 (Composition API, Vite)  
-- **Database:** MySQL / PostgreSQL  
-- **Queue System:** Laravel Queues for background publishing  
-- **Authentication:** Laravel Sanctum  
-- **API Style:** RESTful  
-- **Testing:** PHPUnit (coming soon), Postman collection available  
+## Technology
 
----
+- Laravel and PHP
+- Vue 3 with `<script setup>`
+- Vue Router
+- Vite
+- Tailwind CSS v4 and a small custom design system
+- Axios
+- PHPUnit for backend tests
+- Vitest, JSDOM, and Vue Test Utils for frontend tests
 
-## ✨ Features Overview
+## Local setup
 
-- ✅ Register & authenticate users via token-based login  
-- 📅 Schedule posts across multiple platforms  
-- 📌 Set post status: `draft`, `scheduled`, or `published`  
-- 🧩 Select multiple platforms per post  
-- 🧵 Background job to publish scheduled posts  
-- 🚫 Enforce a daily limit of **10 scheduled posts per user**  
-- 🔍 Filter posts by status or scheduled date  
-- 📥 Upload images (via API)  
-- ⚙️ Platform management with CRUD  
+### Requirements
 
----
+- PHP 8.2 or newer
+- Composer
+- Node.js 20 or newer
+- npm
+- A database supported by the Laravel configuration, such as MySQL or SQLite
 
-## 📁 Project Architecture (Simplified)
-
-
----
-
-## 🔐 Authentication
-
-Laravel Sanctum powers token-based login.
-
-| Method | Endpoint        | Description              |
-|--------|------------------|--------------------------|
-| POST   | `/api/register`  | Register new user        |
-| POST   | `/api/login`     | Get access token         |
-| GET    | `/api/profile`   | Authenticated user info  |
-
-> 🔒 All secured endpoints require the `Authorization: Bearer {token}` header.
-
----
-
-## 📝 Post Management
-
-| Action                   | Description                          |
-|--------------------------|--------------------------------------|
-| `POST /api/posts`        | Create and schedule a post           |
-| `GET /api/user/{user}/posts` | List user's posts with filters |
-| `DELETE /api/posts/{id}` | Delete post (planned)                |
-| `PUT /api/posts/{id}`    | Edit draft/scheduled post (planned)  |
-
-### 📦 Post Payload Example
-
-```json
-{
-  "title": "Launch Feature",
-  "content": "We're going live with version 2.0!",
-  "image_url": "https://example.com/image.jpg",
-  "schedule_time": "2025-08-01T10:00:00",
-  "status": "scheduled",
-  "platform_ids": [1, 2]
-}
-```
-
-> ⚠️ Max 10 scheduled posts per user per day. Exceeding limit returns `429 Too Many Requests`.
-
----
-
-## 🧩 Platform Management
-
-| Action                       | Description               |
-| ---------------------------- | ------------------------- |
-| `GET /api/platforms`         | List all platforms        |
-| `POST /api/platforms`        | Add new platform          |
-| `DELETE /api/platforms/{id}` | Delete platform (planned) |
-
----
-
-## 🖼️ Frontend (Vue 3)
-
-### ✅ Components
-
-* `PostForm.vue`: Compose & schedule posts
-* `PlatformTable.vue`: Manage platform list
-* `PostList.vue`: Display grouped & filtered posts by date and status
-
-### 🧠 UX Features
-
-* Dynamic platform dropdown with fallback
-* Image upload via FormData
-* Real-time form validation
-* Group posts by date (Today, Tomorrow, etc.)
-* Character counters for title & content
-* Status indicators (draft, scheduled, published)
-
----
-
-## 🛠️ API Usage Example: Create Post
-
-```http
-POST /api/posts
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "title": "My First Post",
-  "content": "This is a test post.",
-  "schedule_time": "2025-08-02T15:00:00",
-  "status": "scheduled",
-  "platform_ids": [1, 2]
-}
-```
-
----
-
-## 🔄 Background Jobs
-
-Scheduled posts are published automatically using Laravel's queue system.
+### Install dependencies
 
 ```bash
-php artisan queue:work
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Job Class: `PublishScheduledPost`
+Configure the database and storage values in `.env`, then run migrations:
 
----
-
-## 🔍 Filtering Posts
-
-Use query parameters with the posts endpoint:
-
-```
-GET /api/user/{user}/posts?status=scheduled
-GET /api/user/{user}/posts?schedule_time=2025-08-01
+```bash
+php artisan migrate
 ```
 
+Start the Laravel server and Vite development server in separate terminals:
 
----
-
-## 🤝 Contributing
-
-Pull requests are welcome.  
-Please fork the repository and submit a clear PR.  
-Found a bug or have a feature request? [Open an issue](https://github.com/mahmoodmohamad/social-post-scheduler/issues)
-
----
-
-## 👨‍💻 Maintainer
-
-Built and maintained by [Mahmoud Mohamed](https://github.com/mahmoodmohamad)
-
----
-
-## 📄 License
-
-Licensed under the [MIT License](LICENSE)
+```bash
+php artisan serve
+npm run dev
 ```
+
+The application is served by Laravel and mounts the Vue app from `resources/js/app.js`.
+
+## Testing and build
+
+Run the frontend test suite:
+
+```bash
+npm test
+```
+
+Run the frontend production build:
+
+```bash
+npm run build
+```
+
+Run the Laravel test suite:
+
+```bash
+php artisan test
+```
+
+## API routes used by the frontend
+
+The Vue application currently expects the following authenticated endpoints:
+
+- `POST /api/login`
+- `GET /api/user/{user}/posts`
+- `GET /api/platforms`
+- `POST /api/platforms`
+- `DELETE /api/platforms/{platform}`
+- `POST /api/posts`
+- `POST /api/upload-image`
+
+The exact response shapes are defined by the Laravel controllers in `app/Http/Controllers/Api`.
+
+## Project structure
+
+```text
+resources/
+├── css/app.css                 # Global design system and responsive styles
+└── js/
+    ├── App.vue                 # Authenticated application shell and navigation
+    ├── components/             # Dashboard, editor, calendar, posts, and settings views
+    └── router/index.js          # Vue Router routes and auth guard
+
+tests/
+├── Feature/                    # Laravel feature tests
+├── Unit/                       # Laravel unit tests
+└── frontend/                   # Vue component tests
+```
+
+## Product notes
+
+The frontend redesign prioritizes clear content hierarchy, responsive behavior, keyboard-visible focus states, explicit form labels, useful loading and empty states, and consistent feedback instead of browser alerts. The current application is a strong foundation for adding provider-specific publishing adapters, richer post editing, queued publishing, and role-based workspace permissions.
+
+## License
+
+No license has been selected yet. Add a license before distributing this project publicly.
