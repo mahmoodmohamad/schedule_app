@@ -1,139 +1,127 @@
 <template>
-  <div class="p-6 space-y-8 max-w-7xl mx-auto">
-    <div class="flex justify-between items-center">
-      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-      <div class="space-x-4">
-        <router-link
-          to="/posts"
-          class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
-        >
-           Posts
-        </router-link>
-        <router-link
-          to="/editor"
-          class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
-        >
-          Create Post
-        </router-link>
-        <router-link
-          to="/settings"
-          class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
-        >
-          Platform Settings
-        </router-link>
-        <button
-          @click="logout"
-          class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-        >
-          Logout
-        </button>
+  <div class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Workspace overview</p>
+        <h1 class="page-title">Good to see you{{ userName ? `, ${userName}` : '' }}.</h1>
+        <p class="page-subtitle">Plan, review, and publish content across your connected platforms from one calm workspace.</p>
       </div>
+      <div class="header-actions">
+        <button class="button button-secondary" type="button" :disabled="loading" @click="loadPosts">
+          <span>{{ loading ? 'Refreshing…' : '↻ Refresh' }}</span>
+        </button>
+        <router-link class="button button-primary" to="/editor">＋ Create post</router-link>
+      </div>
+    </header>
+
+    <div class="stat-grid">
+      <article class="surface stat-card">
+        <div class="stat-topline"><span>Total posts</span><span class="stat-icon">▤</span></div>
+        <p class="stat-value">{{ posts.length }}</p>
+        <p class="stat-note">Across your workspace</p>
+      </article>
+      <article class="surface stat-card">
+        <div class="stat-topline"><span>Published</span><span class="stat-icon">✓</span></div>
+        <p class="stat-value">{{ countByStatus('published') }}</p>
+        <p class="stat-note">Ready and live</p>
+      </article>
+      <article class="surface stat-card">
+        <div class="stat-topline"><span>Scheduled</span><span class="stat-icon">◷</span></div>
+        <p class="stat-value">{{ countByStatus('scheduled') }}</p>
+        <p class="stat-note">Queued for publishing</p>
+      </article>
+      <article class="surface stat-card">
+        <div class="stat-topline"><span>Drafts</span><span class="stat-icon">✎</span></div>
+        <p class="stat-value">{{ countByStatus('draft') }}</p>
+        <p class="stat-note">Still in progress</p>
+      </article>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-white p-4 rounded-lg border space-y-4">
-      <h2 class="text-lg font-medium">Filters</h2>
-      <div class="flex gap-4 items-center">
-        <select 
-          v-model="filterStatus" 
-          class="border rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          <option value="">All Statuses</option>
+    <div class="surface" style="margin-bottom: 18px">
+      <div class="surface-header">
+        <div>
+          <h2 class="section-title">Content queue</h2>
+          <p class="section-caption">Filter your posts by status or search by title.</p>
+        </div>
+        <span class="section-caption">{{ filteredPosts.length }} shown</span>
+      </div>
+      <div class="filter-bar">
+        <select v-model="filterStatus" class="form-control" aria-label="Filter by status" style="max-width: 180px">
+          <option value="">All statuses</option>
           <option value="draft">Draft</option>
           <option value="scheduled">Scheduled</option>
           <option value="published">Published</option>
+          <option value="failed">Failed</option>
         </select>
-
-        <input
-          v-model="filterSearch"
-          type="text"
-          placeholder="Search posts..."
-          class="flex-1 border rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        />
-        
-        <button
-          @click="loadPosts"
-          class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Refresh
-        </button>
+        <div class="search-wrap">
+          <span class="search-symbol" aria-hidden="true">⌕</span>
+          <input v-model="filterSearch" class="search-control" type="search" placeholder="Search posts…" aria-label="Search posts" />
+        </div>
       </div>
     </div>
 
-    <div v-if="loading" class="text-center py-8">
-      <div class="text-gray-600">Loading posts...</div>
+    <div v-if="loading" class="surface state"><strong>Loading your workspace</strong><p>Fetching the latest publishing queue.</p></div>
+    <div v-else-if="error" class="alert alert-danger" role="alert">{{ error }}</div>
+    <div v-else-if="posts.length === 0" class="surface state">
+      <strong>Your queue is empty</strong>
+      <p>Create your first post to start planning your publishing calendar.</p>
+      <router-link class="button button-primary" to="/editor">Create your first post</router-link>
     </div>
-
-    <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-      {{ error }}
-    </div>
-
-    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Calendar View -->
-      <div>
-        <h2 class="text-xl font-semibold mb-4">Calendar View</h2>
+    <div v-else class="dashboard-grid">
+      <section class="surface">
+        <div class="surface-header">
+          <div><h2 class="section-title">Recent posts</h2><p class="section-caption">A quick view of your latest content.</p></div>
+          <router-link class="button button-ghost" to="/posts">View all →</router-link>
+        </div>
+        <PostList :posts="filteredPosts.slice(0, 6)" />
+      </section>
+      <section class="surface">
+        <div class="surface-header">
+          <div><h2 class="section-title">Publishing calendar</h2><p class="section-caption">What is coming up next.</p></div>
+        </div>
         <CalendarView :posts="filteredPosts" />
-      </div>
-
-      <!-- List View -->
-      <div>
-        <h2 class="text-xl font-semibold mb-4">List View</h2>
-        <PostList :posts="filteredPosts" />
-      </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, ref } from 'vue';
 import axios from 'axios';
 import CalendarView from './CalendarView.vue';
 import PostList from './PostList.vue';
-
-const router = useRouter();
 
 const posts = ref([]);
 const loading = ref(true);
 const error = ref('');
 const filterStatus = ref('');
 const filterSearch = ref('');
+const userName = ref('');
 
 const loadPosts = async () => {
   loading.value = true;
   error.value = '';
-  
   try {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user.id) {
-      throw new Error('User not found');
-    }
-    
+    userName.value = user.name?.split(' ')[0] || '';
+    if (!user.id) throw new Error('User not found');
     const response = await axios.get(`/api/user/${user.id}/posts`);
     posts.value = response.data.posts || [];
   } catch (err) {
     console.error('Failed to load posts:', err);
-    error.value = 'Failed to load posts';
+    error.value = 'We could not load your posts. Check your connection and try again.';
     posts.value = [];
   } finally {
     loading.value = false;
   }
 };
 
-const filteredPosts = computed(() => {
-  return posts.value.filter(post => {
-    const matchesStatus = !filterStatus.value || post.status === filterStatus.value;
-    const matchesSearch = !filterSearch.value || 
-      post.title.toLowerCase().includes(filterSearch.value.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
-});
+const filteredPosts = computed(() => posts.value.filter((post) => {
+  const title = String(post.title || '').toLowerCase();
+  const query = filterSearch.value.trim().toLowerCase();
+  return (!filterStatus.value || post.status === filterStatus.value) && (!query || title.includes(query));
+}));
 
-const logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  router.push('/login');
-};
-
+const countByStatus = (status) => posts.value.filter((post) => post.status === status).length;
 onMounted(loadPosts);
 </script>

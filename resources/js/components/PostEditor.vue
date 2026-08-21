@@ -1,167 +1,133 @@
 <template>
-  <div class="max-w-2xl mx-auto p-6 space-y-6">
-    <h2 class="text-2xl font-bold text-gray-900">Create New Post</h2>
-
-    <form @submit.prevent="submitPost" class="space-y-6">
+  <div class="page">
+    <header class="page-header">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
-        <input 
-          v-model="form.title" 
-          type="text" 
-          placeholder="Enter post title" 
-          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          required
-        />
-        <div class="text-sm text-gray-500 mt-1">{{ form.title.length }}/255 characters</div>
+        <p class="eyebrow">Content studio</p>
+        <h1 class="page-title">Create a post</h1>
+        <p class="page-subtitle">Shape your message, choose where it should go, and decide when it should be published.</p>
       </div>
+      <router-link class="button button-secondary" to="/dashboard">← Back to dashboard</router-link>
+    </header>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
-        <textarea 
-          v-model="form.content" 
-          placeholder="Write your post content here..." 
-          rows="6"
-          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          required
-        ></textarea>
-        <div class="text-sm text-gray-500 mt-1">{{ form.content.length }}/1000 characters</div>
-      </div>
+    <div class="form-layout">
+      <section class="surface form-card">
+        <div v-if="error" class="alert alert-danger" role="alert" style="margin-bottom: 20px">{{ error }}</div>
+        <div v-if="success" class="alert alert-success" role="status" style="margin-bottom: 20px">{{ success }}</div>
+        <form @submit.prevent="submitPost">
+          <div class="field">
+            <label class="field-label" for="title"><span>Post title</span><span class="field-hint">{{ form.title.length }}/255</span></label>
+            <input id="title" v-model.trim="form.title" class="form-control" maxlength="255" type="text" placeholder="Give your post a clear working title" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="content"><span>Content</span><span class="field-hint">{{ form.content.length }}/1000</span></label>
+            <textarea id="content" v-model.trim="form.content" class="form-control textarea" maxlength="1000" placeholder="Write the message your audience should see…" required></textarea>
+          </div>
+          <div class="field">
+            <label class="field-label" for="platforms">Publishing platforms</label>
+            <select id="platforms" v-model="form.platform_ids" class="form-control select-multiple" multiple :disabled="platformsLoading">
+              <option v-for="platform in platforms" :key="platform.id" :value="platform.id">{{ platform.name }} · {{ platform.type }}</option>
+            </select>
+            <p class="section-caption">{{ platformsLoading ? 'Loading your connected platforms…' : platforms.length ? 'Use Ctrl/Cmd to select more than one.' : 'No platforms yet. Add one in Platform settings.' }}</p>
+          </div>
+          <div class="field">
+            <label class="field-label" for="image"><span>Media</span><span class="field-hint">Optional</span></label>
+            <div class="upload-zone">
+              <input id="image" type="file" accept="image/*" @change="handleImageUpload" />
+              <p v-if="uploading">Uploading image…</p>
+              <p v-else>Choose an image to add a visual layer to your post.</p>
+              <img v-if="form.image_url" class="image-preview" :src="form.image_url" alt="Uploaded post preview" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <router-link class="button button-ghost" to="/dashboard">Cancel</router-link>
+            <button class="button button-primary" type="submit" :disabled="submitting || uploading || !form.title || !form.content">
+              {{ submitting ? 'Creating post…' : 'Create post' }}
+            </button>
+          </div>
+        </form>
+      </section>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Select Platforms</label>
-        <div v-if="platforms.length === 0" class="text-red-600 text-sm mb-2">
-          No platforms available. Please add platforms in settings first.
+      <aside class="surface side-summary">
+        <p class="eyebrow">Publishing details</p>
+        <h2 class="section-title">A quick final check</h2>
+        <div class="summary-list">
+          <div class="summary-row"><span>Status</span><strong>{{ form.status }}</strong></div>
+          <div class="summary-row"><span>Platforms</span><strong>{{ form.platform_ids.length || 'None selected' }}</strong></div>
+          <div class="summary-row"><span>Schedule</span><strong>{{ form.schedule_time ? 'Scheduled' : 'Manual' }}</strong></div>
         </div>
-        <select 
-          v-else
-          v-model="form.platform_ids" 
-          multiple 
-          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          <option v-for="platform in platforms" :key="platform.id" :value="platform.id">
-            {{ platform.name }} ({{ platform.type }})
-          </option>
-        </select>
-        <p class="text-sm text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple platforms</p>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Image Upload</label>
-        <input 
-          type="file" 
-          @change="handleImageUpload" 
-          accept="image/*"
-          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        />
-        <div v-if="form.image_url" class="mt-2">
-          <img :src="form.image_url" alt="Preview" class="max-w-xs h-auto rounded-md" />
+        <div class="field" style="margin-top: 24px">
+          <label class="field-label" for="schedule">Schedule time</label>
+          <input id="schedule" v-model="form.schedule_time" class="form-control" type="datetime-local" />
         </div>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Time (Optional)</label>
-        <input 
-          type="datetime-local" 
-          v-model="form.schedule_time" 
-          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-        <select 
-          v-model="form.status" 
-          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          <option value="draft">Draft</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="published">Published</option>
-        </select>
-      </div>
-
-      <button 
-        type="submit" 
-        :disabled="submitting"
-        class="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        {{ submitting ? 'Creating Post...' : 'Create Post' }}
-      </button>
-    </form>
+        <div class="field">
+          <label class="field-label" for="status">Post status</label>
+          <select id="status" v-model="form.status" class="form-control">
+            <option value="draft">Draft</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+      </aside>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const router = useRouter();
-
-const form = ref({
-  title: '',
-  content: '',
-  image_url: '',
-  platform_ids: [],
-  schedule_time: '',
-  status: 'draft',
-});
-
+const form = ref({ title: '', content: '', image_url: '', platform_ids: [], schedule_time: '', status: 'draft' });
 const platforms = ref([]);
+const platformsLoading = ref(true);
+const uploading = ref(false);
 const submitting = ref(false);
+const error = ref('');
+const success = ref('');
 
 const loadPlatforms = async () => {
+  platformsLoading.value = true;
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.get('/api/platforms', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await axios.get('/api/platforms');
     platforms.value = response.data.platforms || [];
-  } catch (error) {
-    console.error('Failed to load platforms:', error);
-    platforms.value = [];
+  } catch (err) {
+    console.error('Failed to load platforms:', err);
+    error.value = 'We could not load your platforms. You can still save a draft and configure them later.';
+  } finally {
+    platformsLoading.value = false;
   }
 };
 
 const handleImageUpload = async (event) => {
-  const file = event.target.files[0];
+  const file = event.target.files?.[0];
   if (!file) return;
-
-  const formData = new FormData();
-  formData.append('image', file);
-
+  uploading.value = true;
+  error.value = '';
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.post('/api/upload-image', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const body = new FormData();
+    body.append('image', file);
+    const response = await axios.post('/api/upload-image', body, { headers: { 'Content-Type': 'multipart/form-data' } });
     form.value.image_url = response.data.image_url;
-  } catch (error) {
-    console.error('Image upload failed:', error);
-    alert('Failed to upload image');
+  } catch (err) {
+    console.error('Image upload failed:', err);
+    error.value = 'The image could not be uploaded. Please try another file.';
+  } finally {
+    uploading.value = false;
   }
 };
 
 const submitPost = async () => {
   submitting.value = true;
-  
+  error.value = '';
+  success.value = '';
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.post('/api/posts', form.value, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    
-    alert('Post created successfully!');
-    router.push('/dashboard');
-  } catch (error) {
-    console.error('Failed to create post:', error);
-    alert('Failed to create post. Please try again.');
+    await axios.post('/api/posts', form.value);
+    success.value = 'Post created. Taking you back to your workspace…';
+    window.setTimeout(() => router.push('/dashboard'), 650);
+  } catch (err) {
+    console.error('Failed to create post:', err);
+    error.value = err.response?.data?.message || 'The post could not be created. Please check the form and try again.';
   } finally {
     submitting.value = false;
   }

@@ -1,38 +1,14 @@
 <template>
-  <span
-    :class="statusClass"
-    class="px-2 py-1 rounded text-white text-xs font-semibold"
-  >
-    {{ statusLabel }}
-  </span>
+  <span class="status-pill" :class="`status-${normalizedStatus}`" :aria-label="`Status: ${label}`">{{ label }}</span>
 </template>
 
 <script setup>
 import { computed } from 'vue';
 
-const props = defineProps({
-  status: {
-    type: String,
-    required: false,
-    default: 'unknown'
-  }
+const props = defineProps({ status: { type: String, default: 'unknown' } });
+const normalizedStatus = computed(() => {
+  const value = String(props.status || 'unknown').toLowerCase();
+  return ['scheduled', 'published', 'draft', 'failed'].includes(value) ? value : 'unknown';
 });
-
-const statusMap = {
-  scheduled: { label: 'Scheduled', class: 'bg-blue-500' },
-  published: { label: 'Published', class: 'bg-green-500' },
-  draft: { label: 'Draft', class: 'bg-gray-500' },
-  failed: { label: 'Failed', class: 'bg-red-500' },
-  unknown: { label: 'Unknown', class: 'bg-gray-400' }
-};
-
-const statusLabel = computed(() => {
-  const status = props.status?.toLowerCase() || 'unknown';
-  return statusMap[status]?.label || 'Unknown';
-});
-
-const statusClass = computed(() => {
-  const status = props.status?.toLowerCase() || 'unknown';
-  return statusMap[status]?.class || 'bg-gray-400';
-});
+const label = computed(() => normalizedStatus.value === 'unknown' ? 'Unknown' : normalizedStatus.value);
 </script>
