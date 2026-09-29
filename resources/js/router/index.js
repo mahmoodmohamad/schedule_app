@@ -3,16 +3,18 @@ import Login from '../components/LoginForm.vue';
 import Dashboard from '../components/Dashboard.vue';
 import PlatformSettings from '../components/PlatformSettings.vue';
 import PostEditor from '../components/PostEditor.vue';
-import PostList from '../components/PostList.vue';
-
+import AllPosts from '../components/AllPosts.vue';
+import Landing from '../components/Landing.vue';
 const routes = [
-  { path: '/', redirect: '/login' },
+  { path: '/', component: Landing },
+  { path: '/', redirect: '/dashboard' },
   { path: '/login', component: Login },
   { path: '/dashboard', component: Dashboard },
-  { path: '/platform-settings', redirect: '/settings' },
   { path: '/editor', component: PostEditor },
   { path: '/settings', component: PlatformSettings },
-  { path: '/posts', component: PostList },
+  { path: '/platform-settings', redirect: '/settings' },
+  { path: '/posts', component: AllPosts },
+  { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });

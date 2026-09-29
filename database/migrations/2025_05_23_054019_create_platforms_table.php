@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('platforms', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('type',['twitter','instagram','linkedin']);
+           $table->string('type');
             $table->timestamps();
         });
     }

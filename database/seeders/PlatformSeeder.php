@@ -2,39 +2,22 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Platform;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class PlatformSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
-        DB::table('platforms')->insert(
-            [
-                [
-                'name' => 'Twitter Account',
-                'type' => 'twitter',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Instagram Page',
-                'type' => 'instagram',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'LinkedIn Profile',
-                'type' => 'linkedin',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            ]
-        );
+        $platforms = [
+            ['name' => 'Twitter Account', 'type' => 'social'],
+            ['name' => 'Instagram Page', 'type' => 'social'],
+            ['name' => 'LinkedIn Profile', 'type' => 'social'],
+            ['name' => 'Company Blog', 'type' => 'blog'],
+        ];
+
+        foreach ($platforms as $platform) {
+            Platform::firstOrCreate(['name' => $platform['name']], $platform);
+        }
     }
 }

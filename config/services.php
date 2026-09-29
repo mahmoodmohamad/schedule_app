@@ -34,5 +34,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+'facebook' => [
+    'graph_version' => env('FACEBOOK_GRAPH_VERSION', 'v21.0'),
+],
 ];

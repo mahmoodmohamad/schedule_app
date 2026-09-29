@@ -6,46 +6,49 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class SaveController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-     public function __invoke(Request $request)
+    public function __invoke(Request $request)
     {
         $data = $request->validate([
-            'title' => 'required|max:255|string',
-            'content' => 'required|max:1000|string',
-            'image_url' => 'nullable',
-            'schedule_time' => 'required|date',
-            'status' => 'required',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string|max:1000',
+            'image_url' => 'nullable|string',
+            'schedule_time' => 'nullable|date',
+            'status' => 'required|in:draft,scheduled,published',
             'platform_ids' => 'required|array',
-            'platform_ids.*' => 'exists:platforms,id'
+            'platform_ids.*' => 'exists:platforms,id',
         ]);
 
-        $user = Auth::user();
+        $user = $request->user();
 
-        
-        $scheduledDate = Carbon::parse($data['schedule_time'])->toDateString();
-        $scheduledCount = Post::where('user_id', $user->id)
-            ->whereDate('schedule_time', $scheduledDate)
-            ->count();
+        // Daily cap (only when a schedule_time is provided)
+        if (!empty($data['schedule_time'])) {
+            $scheduledDate = Carbon::parse($data['schedule_time'])->toDateString();
 
-        if ($scheduledCount >= 10) {
-            return response()->json([
-                'message' => 'You can only schedule up to 10 posts per day.'
-            ], 429); // 429 Too Many Requests
+            $scheduledCount = Post::where('user_id', $user->id)
+                ->whereDate('schedule_time', $scheduledDate)
+                ->count();
+
+            if ($scheduledCount >= 10) {
+                return response()->json([
+                    'message' => 'You can only schedule up to 10 posts per day.',
+                ], 429);
+            }
         }
 
-        //  Proceed to save
         $data['user_id'] = $user->id;
+
         $post = Post::create($data);
-        $post->platforms()->attach($request->platform_ids);
+        $post->platforms()->attach(
+    collect($data['platform_ids'])
+        ->mapWithKeys(fn ($id) => [$id => ['platform_status' => 'active']])
+        ->all()
+);
 
         return response()->json([
             'post' => $post->load('platforms'),
-        ]);
+        ], 201);
     }
 }

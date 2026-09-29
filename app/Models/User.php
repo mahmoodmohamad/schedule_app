@@ -51,4 +51,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class);
     }
+    public function platforms(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+{
+    return $this->belongsToMany(Platform::class, 'post_platforms', 'user_id', 'platform_id');
+}
 }

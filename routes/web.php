@@ -2,13 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-Route::get('/{any}', function () {
-    return view('dashboard');   
-})->where('any', '.*');
-
+Route::view('/{any?}', 'dashboard')->where('any', '^(?!api).*$');
 
 //Route::get('/login', function () {
   //  return view('dashboard'); 

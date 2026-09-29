@@ -14,7 +14,9 @@ class Post extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function platforms() {
-        return $this->belongsToMany(Platform::class, 'post_platforms')->withPivot('platform_status');;
-    }
+    public function platforms()
+{
+    return $this->belongsToMany(Platform::class, 'post_platforms')
+        ->withPivot('platform_status', 'publish_status', 'external_post_id', 'published_at', 'error');
+}
 }

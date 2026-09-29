@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('content');
             $table->string('image_url')->nullable();
-            $table->datetime('schedule_time');
-            $table->enum('status',['draft','scheduled','published']);
+   $table->dateTime('schedule_time')->nullable();
+$table->enum('status', ['draft', 'scheduled', 'published', 'failed']);
             $table->unsignedInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

@@ -9,24 +9,26 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
     public function __invoke(Request $request, User $user)
     {
-        //
-        $query = Post::with('user');
-        if($request->has('status'))
-        {
-            $query->where('status',$request->status);
+        // Fix IDOR: only allow a user to read their own posts
+        abort_if($request->user()->id !== $user->id, 403);
+
+        $query = Post::where('user_id', $user->id)
+            ->with(['user', 'platforms']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
-           if($request->has('schedule_time'))
-        {
-            $query->where('schedule_time',$request->schedule_time);
+
+        if ($request->filled('schedule_time')) {
+            $query->whereDate('schedule_time', $request->schedule_time);
         }
-        $posts=$query->get();
+
+        $posts = $query->latest()->get();
+
         return response()->json([
-            'posts'=>$posts
+            'posts' => $posts,
         ]);
-        }
+    }
 }

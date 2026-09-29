@@ -1,6 +1,6 @@
 <template>
   <div class="app-shell">
-    <aside v-if="isAuthenticated" class="app-sidebar" :class="{ 'is-open': mobileMenuOpen }">
+    <aside v-if="showShell" class="app-sidebar" :class="{ 'is-open': mobileMenuOpen }">
       <div class="sidebar-brand">
         <div class="brand-mark">S</div>
         <div>
@@ -43,10 +43,10 @@
       </div>
     </aside>
 
-    <div v-if="isAuthenticated && mobileMenuOpen" class="sidebar-backdrop" @click="closeMenu"></div>
+    <div v-if="showShell && mobileMenuOpen" class="sidebar-backdrop" @click="closeMenu"></div>
 
-    <main class="app-main" :class="{ 'is-authenticated': isAuthenticated }">
-      <header v-if="isAuthenticated" class="mobile-header">
+    <main class="app-main" :class="{ 'is-authenticated': showShell }">
+      <header v-if="showShell" class="mobile-header">
         <button class="icon-button" type="button" aria-label="Open navigation" @click="mobileMenuOpen = true">☰</button>
         <span class="mobile-brand">Schedule</span>
         <router-link to="/editor" class="mobile-create" aria-label="Create post">＋</router-link>
@@ -55,14 +55,17 @@
     </main>
   </div>
 </template>
-
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 const mobileMenuOpen = ref(false);
 const isAuthenticated = ref(Boolean(localStorage.getItem('token')));
+
+const publicPaths = ['/', '/login'];
+const showShell = computed(() => isAuthenticated.value && !publicPaths.includes(route.path));
 
 router.afterEach(() => {
   isAuthenticated.value = Boolean(localStorage.getItem('token'));
@@ -77,6 +80,6 @@ const logout = () => {
   localStorage.removeItem('user');
   isAuthenticated.value = false;
   closeMenu();
-  router.push('/login');
+  router.push('/');
 };
 </script>
