@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -47,12 +47,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function posts(): HasMany
+       public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
     }
-    public function platforms(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-{
-    return $this->belongsToMany(Platform::class, 'post_platforms', 'user_id', 'platform_id');
+
+    public function platforms(): BelongsToMany
+    {
+        return $this->belongsToMany(Platform::class, 'user_platforms')
+            ->withPivot('is_active')
+            ->withTimestamps();
+    }
 }
-}
+

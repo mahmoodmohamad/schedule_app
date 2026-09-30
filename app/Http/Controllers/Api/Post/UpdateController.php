@@ -8,33 +8,35 @@ use Illuminate\Http\Request;
 
 class UpdateController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
     public function __invoke(Request $request, Post $post)
     {
-        //
-        if ($post->status != 'scheduled') {
-            return response()->json([
-                'message' => 'This is not scheduled post',
-            ]);
-        }
-        $data = $request->validate(
+        abort_if($post->user_id !== $request->user()->id, 403);
 
-            [
-                'title' => 'required|max:255|string',
-                'content' => 'required|max:1000|string',
-                'image_url' => 'nullable',
-                'schedule_time' => 'required|date',
-                'status' => 'required',
-                'platform_ids' => 'required|array',
-                'platform_ids.*' => 'exists:platforms,id'
-            ]
-        );
+        if ($post->status !== 'scheduled') {
+            return response()->json(['message' => 'Only scheduled posts can be updated.'], 422);
+        }
+
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string|max:1000',
+            'image_url' => 'nullable|string',
+            'schedule_time' => 'required|date',
+            'status' => 'required|in:draft,scheduled,published,failed',
+            'platform_ids' => 'required|array',
+            'platform_ids.*' => 'exists:platforms,id',
+        ]);
+
+        $platformIds = $data['platform_ids'];
+        unset($data['platform_ids']);
+
         $post->update($data);
+        $post->platforms()->sync(
+            collect($platformIds)->mapWithKeys(fn ($id) => [$id => ['platform_status' => 'active']])->all()
+        );
+
         return response()->json([
-            'message'=>'The scheduled post updated successfully',
-            'post'=>$post,
+            'message' => 'The scheduled post updated successfully',
+            'post' => $post->load('platforms'),
         ]);
     }
 }

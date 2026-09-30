@@ -7,7 +7,6 @@ import AllPosts from '../components/AllPosts.vue';
 import Landing from '../components/Landing.vue';
 const routes = [
   { path: '/', component: Landing },
-  { path: '/', redirect: '/dashboard' },
   { path: '/login', component: Login },
   { path: '/dashboard', component: Dashboard },
   { path: '/editor', component: PostEditor },
@@ -19,9 +18,11 @@ const routes = [
 
 const router = createRouter({ history: createWebHistory(), routes });
 
+const publicPaths = ['/', '/login'];
+
 router.beforeEach((to) => {
   const authenticated = Boolean(localStorage.getItem('token'));
-  if (to.path !== '/login' && !authenticated) return '/login';
+  if (!publicPaths.includes(to.path) && !authenticated) return '/login';
   if (to.path === '/login' && authenticated) return '/dashboard';
   return true;
 });

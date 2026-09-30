@@ -8,24 +8,13 @@ use Illuminate\Http\Request;
 
 class DeleteController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request, $postId)
+    public function __invoke(Request $request, Post $post)
     {
-        $post = Post::find($postId);
-        //
-         if (!$post) {
-            return response()->json([
-                'message' => 'Post not found',
-                'success' => false
-            ], 404); // HTTP 404 Not Found status
-        }
+        abort_if($post->user_id !== $request->user()->id, 403);
 
         $post->platforms()->detach();
         $post->delete();
-        return response()->json([
-            "message"=>'Post deleted successfully',
-        ]);
+
+        return response()->json(['message' => 'Post deleted successfully']);
     }
 }
